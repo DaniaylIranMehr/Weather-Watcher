@@ -75,6 +75,9 @@ def get_weather(lat, lon):
 
 
 def send_to_webhook(data, webhook_url, api_key):
+    """
+    Send JSON data to a webhook URL with Authorization header.
+    """
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
     try:
         response = requests.post(webhook_url, json=data, headers=headers, timeout=10)
@@ -117,4 +120,5 @@ def main():
     send_to_webhook(payload, webhook_url, api_key)
 
 
-main()
+if __name__ == "__main__":
+    main()

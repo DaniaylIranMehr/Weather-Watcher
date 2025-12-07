@@ -74,20 +74,47 @@ def get_weather(lat, lon):
         print(f"Failed to parse JSON from weather API: {e}")
 
 
+def send_to_webhook(data, webhook_url, api_key):
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
+    try:
+        response = requests.post(webhook_url, json=data, headers=headers, timeout=10)
+        response.raise_for_status()
+        print("Data sent successfully!")
+        print("HTTP status:", response.status_code)
+        print("Response text (first 500 chars):", response.text[:500])
+    except requests.exceptions.RequestException as e:
+        print("Error sending to webhook:", e)
+
+
 
 def main():
-    city_name = "Tehran"
+    city_name = "Bologna"
+    api_key = "test123"
+    webhook_url = "https://webhook.site/8546f6e9-3a57-406b-847e-8982b5e4cfec"
 
     coords = geocode_city(city_name)
     if coords is None:
-        print("Could not get coordinates. Exiting.")
-    else:
-        lat, lon = coords
-        print(f"Coordinates of {city_name}: Latitude={lat}, Longitude={lon}")
+        print("Could not get coordinates!")
+        return
 
-        weather = get_weather(lat, lon)
-        if weather is not None:
-            print("Current weather data:", weather)
+    lat, lon = coords
+    print(f"Coordinates of {city_name}: Latitude={lat}, Longitude={lon}")
+
+    weather = get_weather(lat, lon)
+    if weather is None:
+        print("Weatehr data not available!")
+        return
+    
+    payload = {
+        "city": city_name,
+        "latitude": lat,
+        "longitude": lon,
+        "temperature": weather.get("temperature"),
+        "windspeed": weather.get("windspeed"),
+        "weathercode": weather.get("weathercode")
+    }
+
+    send_to_webhook(payload, webhook_url, api_key)
 
 
 main()
